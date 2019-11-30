@@ -8,7 +8,7 @@ import org.occidere.githubnotifier.vo.GithubFollower;
  * @since 2019-11-29
  */
 public interface GithubApi {
-    String GITHUB_API_ADDRESS = "https://api.github.com";
+    String GITHUB_API_URL = "https://api.github.com";
 
-    List<GithubFollower> getFollowers();
+    List<GithubFollower> getFollowers(String userId);
 }
