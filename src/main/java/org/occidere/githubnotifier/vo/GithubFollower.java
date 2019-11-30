@@ -1,22 +1,28 @@
 package org.occidere.githubnotifier.vo;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 /**
  * @author occidere
  * @since 2019-11-29
  */
-@Builder
+@Getter
+@Setter
 @ToString
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class GithubFollower {
     private long id;
+    @JsonProperty("node_id")
+    private String nodeId;
     private String login;
+    @JsonProperty("avatar_url")
     private String avatarUrl;
+    @JsonProperty("html_url")
     private String htmlUrl;
 }
