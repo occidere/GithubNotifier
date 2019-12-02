@@ -1,25 +1,24 @@
 package org.occidere.githubnotifier.vo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 /**
  * @author occidere
- * @since 2019. 11. 29.
+ * @since 2019. 12. 02.
  * Blog: https://blog.naver.com/occidere
  * Github: https://github.com/occidere
  */
 @Getter
 @Setter
 @Document(
-        indexName = "github-follow-info",
+        indexName = "github-monitoring-target",
         shards = 5,
         replicas = 1,
         refreshInterval = "60s",
@@ -28,7 +27,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class GithubUser {
+public class GithubMonitoringTarget {
 
     @Id
     private long id;
@@ -52,5 +51,4 @@ public class GithubUser {
     private String avatarUrl;
     @JsonProperty("html_url")
     private String htmlUrl;
-    private List<String> followerList = new ArrayList<>();
 }
