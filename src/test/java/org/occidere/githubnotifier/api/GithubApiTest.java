@@ -1,16 +1,14 @@
 package org.occidere.githubnotifier.api;
 
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.occidere.githubnotifier.configuration.GithubNotifierConfiguration;
-import org.occidere.githubnotifier.vo.GithubFollower;
+import org.occidere.githubnotifier.service.GithubApiRepository;
+import org.occidere.githubnotifier.service.GithubMonitoringTargetService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.List;
 
 /**
  * @author occidere
@@ -20,18 +18,26 @@ import java.util.List;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
-		GithubNotifierConfiguration.class,
+        GithubNotifierConfiguration.class,
 })
-@SpringBootTest
 public class GithubApiTest {
 
-	@Autowired
-	@Qualifier("followerApi")
-	private GithubApi followerApi;
+    @Autowired
+    private GithubApiRepository githubApiRepository;
 
-	@Test
-	public void getFollowerApiTest() {
-		List<GithubFollower> followers = followerApi.getFollowers("marching0531");
+    @Autowired
+    private GithubMonitoringTargetService monitoringTargetService;
 
-	}
+    @Test
+    public void getFollowerApiTest() {
+        List<String> followers = githubApiRepository.getFollowers("occidere");
+    }
+
+    @Test
+    public void getTargetUserIdTest() {
+        List<String> logins = monitoringTargetService.findAllLogins();
+        for (String login : logins) {
+            System.out.println(login);
+        }
+    }
 }
