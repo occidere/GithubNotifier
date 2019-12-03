@@ -27,10 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 public class GithubUserFollowerInfoProcessor implements ItemProcessor<String, GithubUserFollowerInfo>, StepExecutionListener {
 
-    private static final int NEW_FOLLOWER = 1;
-    private static final int DELETED_FOLLOWER = -1;
-    private static final int NOT_CHANGED_FOLLOWER = 0;
-
     @Autowired
     private GithubApiRepository apiRepository;
 
@@ -53,7 +49,7 @@ public class GithubUserFollowerInfoProcessor implements ItemProcessor<String, Gi
         // Data from Github API
         GithubUser latestUser = apiRepository.getUser(item);
         final Map<String, Integer> latestFollowers = apiRepository.getFollowers(item).stream()
-                .collect(Collectors.toMap(Function.identity(), id -> NEW_FOLLOWER));
+                .collect(Collectors.toMap(Function.identity(), id -> 1));
         log.info("{} info from Github API: {}", item, latestUser);
         log.info("Followers of {}: {}", item, latestFollowers);
 
@@ -61,7 +57,7 @@ public class GithubUserFollowerInfoProcessor implements ItemProcessor<String, Gi
         // Data from DB (Elasticsearch)
         GithubUser previousUser = ObjectUtils.firstNonNull(userRepository.findByLogin(item), new GithubUser());
         final Map<String, Integer> previousFollowers = previousUser.getFollowerList().stream()
-                .collect(Collectors.toMap(Function.identity(), id -> NOT_CHANGED_FOLLOWER));
+                .collect(Collectors.toMap(Function.identity(), id -> -1));
         log.info("{} info from DB: {}", item, previousUser);
         log.info("Followers of {}: {}", item, previousFollowers);
 
@@ -74,13 +70,13 @@ public class GithubUserFollowerInfoProcessor implements ItemProcessor<String, Gi
         latestFollowers.forEach((k, v) -> previousFollowers.merge(k, v, Integer::sum));
         previousFollowers.forEach((userId, status) -> {
             switch (status) {
-                case NOT_CHANGED_FOLLOWER:
+                case 0:
                     notChangedFollowers.add(userId);
                     break;
-                case DELETED_FOLLOWER:
+                case -1:
                     deletedFollowers.add(userId);
                     break;
-                case NEW_FOLLOWER:
+                case 1:
                     newFollowers.add(userId);
                     break;
                 default:
