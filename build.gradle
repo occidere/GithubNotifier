@@ -25,6 +25,9 @@ dependencies {
     implementation 'commons-io:commons-io:2.6'
     implementation 'org.apache.commons:commons-lang3:3.9'
     implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'com.linecorp.bot:line-bot-api-client:3.1.0'
+    implementation 'com.linecorp.bot:line-bot-model:3.1.0'
+
 
 
     compileOnly 'org.projectlombok:lombok'

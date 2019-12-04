@@ -1,12 +1,13 @@
 package org.occidere.githubnotifier.vo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
@@ -19,11 +20,12 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @Getter
 @Setter
 @Document(
-        indexName = "github-follow-info",
+        indexName = "github-followers",
         shards = 5,
         replicas = 1,
         refreshInterval = "60s",
-        createIndex = true
+        createIndex = true,
+        type = "_doc"
 )
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -34,23 +36,16 @@ public class GithubUser {
     private long id;
     @JsonProperty("node_id")
     private String nodeId;
-    @JsonProperty("login")
     private String login;
-    @JsonProperty("name")
     private String name;
-    @JsonProperty("company")
     private String company;
-    @JsonProperty("blog")
     private String blog;
-    @JsonProperty("location")
     private String location;
-    @JsonProperty("email")
     private String email;
-    @JsonProperty("bio")
     private String bio;
     @JsonProperty("avatar_url")
     private String avatarUrl;
     @JsonProperty("html_url")
     private String htmlUrl;
-    private List<String> followerList = new ArrayList<>();
+    private List<GithubFollower> followerList = new ArrayList<>();
 }

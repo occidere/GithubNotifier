@@ -1,14 +1,12 @@
 package org.occidere.githubnotifier.configuration;
 
+import com.linecorp.bot.client.LineMessagingClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.occidere.githubnotifier.batch.GithubUserFetchReader;
-import org.occidere.githubnotifier.batch.GithubUserFollowerInfoProcessor;
-import org.occidere.githubnotifier.batch.GithubUserReflectWriter;
+import org.occidere.githubnotifier.batch.GithubFollowerNotificationTasklet;
 import org.occidere.githubnotifier.service.GithubApiRepository;
 import org.occidere.githubnotifier.service.GithubApiService;
-import org.occidere.githubnotifier.vo.GithubUserFollowerInfo;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -17,9 +15,7 @@ import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -73,6 +69,12 @@ public class GithubNotifierConfiguration extends AbstractElasticsearchConfigurat
     }
 
     @Bean
+    @StepScope
+    public LineMessagingClient lineMessagingClient(@Value("#{jobParameters[lineChannelToken]}") String lineChannel) {
+        return LineMessagingClient.builder(lineChannel).build();
+    }
+
+    @Bean
     public Job githubUserFollowerNotificationJob() {
         return jobBuilderFactory.get("githubUserFollowerNotificationJob")
                 .incrementer(new RunIdIncrementer())
@@ -84,28 +86,13 @@ public class GithubNotifierConfiguration extends AbstractElasticsearchConfigurat
     @JobScope
     public Step githubUserFollowerNotificationStep() {
         return stepBuilderFactory.get("githubUserFollowerNotificationStep")
-                .<String, GithubUserFollowerInfo>chunk(1)
-                .reader(getGithubUserFetchReader())
-                .processor(getGithubUserFollowerInfoProcessor())
-                .writer(getGithubUserReflectWriter())
+                .tasklet(githubFollowerNotificationTasklet())
                 .build();
     }
 
     @Bean
     @StepScope
-    public GithubUserFetchReader getGithubUserFetchReader() {
-        return new GithubUserFetchReader();
-    }
-
-    @Bean
-    @StepScope
-    public ItemProcessor<String, GithubUserFollowerInfo> getGithubUserFollowerInfoProcessor() {
-        return new GithubUserFollowerInfoProcessor();
-    }
-
-    @Bean
-    @StepScope
-    public ItemWriter<GithubUserFollowerInfo> getGithubUserReflectWriter() {
-        return new GithubUserReflectWriter();
+    public GithubFollowerNotificationTasklet githubFollowerNotificationTasklet() {
+        return new GithubFollowerNotificationTasklet();
     }
 }

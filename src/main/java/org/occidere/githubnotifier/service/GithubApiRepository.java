@@ -1,6 +1,7 @@
 package org.occidere.githubnotifier.service;
 
 import java.util.List;
+import org.occidere.githubnotifier.vo.GithubFollower;
 import org.occidere.githubnotifier.vo.GithubUser;
 
 /**
@@ -11,9 +12,8 @@ import org.occidere.githubnotifier.vo.GithubUser;
  */
 public interface GithubApiRepository {
     String GITHUB_API_URL = "https://api.github.com";
-    String TOKEN = "b388bc7c097b3588bc94dd30389abcc5a6f2b38d";
 
     GithubUser getUser(String userId);
 
-    List<String> getFollowers(String userId);
+    List<GithubFollower> getFollowers(String userId);
 }

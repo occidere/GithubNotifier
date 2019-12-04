@@ -2,11 +2,12 @@ package org.occidere.githubnotifier.service;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.occidere.githubnotifier.vo.GithubFollower;
 import org.occidere.githubnotifier.vo.GithubUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,13 +27,20 @@ public class GithubApiService implements GithubApiRepository {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Value("#{jobParameters['githubApiToken'] == null ? '' : jobParameters['githubApiToken']}")
+    private String githubApiToken;
+
     @Override
     public GithubUser getUser(String userId) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(TOKEN);
-        HttpEntity<GithubUser> httpEntity = new HttpEntity<>(null, headers);
+        HttpEntity<GithubUser> httpEntity = null;
+        if (StringUtils.isNotBlank(githubApiToken)) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(githubApiToken);
+            httpEntity = new HttpEntity<>(null, headers);
+        }
+
         ResponseEntity<GithubUser> entity = restTemplate.exchange(
-                URI.create(GITHUB_API_URL + "/users/" + userId + "?client_secret=" + TOKEN),
+                URI.create(GITHUB_API_URL + "/users/" + userId),
                 HttpMethod.GET,
                 httpEntity,
                 new ParameterizedTypeReference<GithubUser>() {
@@ -42,27 +50,31 @@ public class GithubApiService implements GithubApiRepository {
     }
 
     @Override
-    public List<String> getFollowers(String userId) {
+    public List<GithubFollower> getFollowers(String userId) {
         final String url = GITHUB_API_URL + "/users/" + userId + "/followers?page=";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(TOKEN);
-        HttpEntity<GithubUser> httpEntity = new HttpEntity<>(null, headers);
 
-        List<String> followers = new ArrayList<>();
+        HttpEntity<GithubUser> httpEntity = null;
+        if (StringUtils.isNotBlank(githubApiToken)) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(githubApiToken);
+            httpEntity = new HttpEntity<>(null, headers);
+        }
+
+        List<GithubFollower> followers = new ArrayList<>();
         for (int page = 1; ; page++) {
-            final ResponseEntity<List<LinkedHashMap<String, Object>>> entity = restTemplate.exchange(
+            final ResponseEntity<List<GithubFollower>> entity = restTemplate.exchange(
                     URI.create(url + page),
                     HttpMethod.GET,
                     httpEntity,
-                    new ParameterizedTypeReference<List<LinkedHashMap<String, Object>>>() {
+                    new ParameterizedTypeReference<List<GithubFollower>>() {
                     }
             );
 
-            final List<LinkedHashMap<String, Object>> body = entity.getBody();
+            final List<GithubFollower> body = entity.getBody();
             if (CollectionUtils.isEmpty(body)) {
                 break;
             } else {
-                followers.addAll(body.stream().map(lhm -> (String) lhm.get("login")).collect(Collectors.toList()));
+                followers.addAll(body);
             }
         }
 
