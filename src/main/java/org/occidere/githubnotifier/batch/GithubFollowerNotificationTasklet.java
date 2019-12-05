@@ -51,15 +51,21 @@ public class GithubFollowerNotificationTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        log.info("User id: {}", userId);
+
         // Data from Github API
         GithubUser latestUser = apiRepository.getUser(userId);
         Map<String, GithubFollower> latestFollowers = apiRepository.getFollowers(userId).stream()
                 .collect(Collectors.toMap(GithubFollower::getLogin, Function.identity()));
 
+        log.info("The number of follower from API: {}", latestFollowers.size());
+
         // Data from DB (Elasticsearch)
         GithubUser previousUser = ObjectUtils.firstNonNull(userRepository.findByLogin(userId), new GithubUser());
         Map<String, GithubFollower> previousFollowers = previousUser.getFollowerList().stream()
                 .collect(Collectors.toMap(GithubFollower::getLogin, Function.identity()));
+
+        log.info("The number of follower stored in DB: {}", previousFollowers.size());
 
         // Grouping followers by NEW / DELETE / NOT_CHANGED
         final List<GithubFollower> newFollowers = new ArrayList<>();
@@ -82,6 +88,10 @@ public class GithubFollowerNotificationTasklet implements Tasklet {
                 deletedFollowers.add(entry.getValue());
             }
         }
+
+        log.info("Recently added new followers: {}", newFollowers.size());
+        log.info("Recently deleted followers: {}", deletedFollowers.size());
+        log.info("Not changed followers: {}", notChangedFollowers.size());
 
         // Send Line message if exist added / deleted followers
         String msg = "";
@@ -106,7 +116,6 @@ public class GithubFollowerNotificationTasklet implements Tasklet {
 
         // Update followers to latest status (new followers + exists follower)
         latestUser.setFollowerList(ListUtils.union(newFollowers, notChangedFollowers));
-        System.out.println(latestUser.getFollowerList()); // FIXME
         userRepository.save(latestUser); // always update for user info changed situation
 
         return RepeatStatus.FINISHED;
