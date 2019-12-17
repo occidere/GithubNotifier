@@ -3,7 +3,6 @@ package org.occidere.githubnotifier.configuration;
 import com.linecorp.bot.client.LineMessagingClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.occidere.githubnotifier.batch.GithubFollowerNotificationTasklet;
 import org.occidere.githubnotifier.service.GithubApiRepository;
 import org.occidere.githubnotifier.service.GithubApiService;
@@ -19,10 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.elasticsearch.client.ClientConfiguration;
-import org.springframework.data.elasticsearch.client.RestClients;
-import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
-import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,19 +29,13 @@ import org.springframework.web.client.RestTemplate;
  */
 @Configuration
 @EnableBatchProcessing
-@EnableElasticsearchRepositories
 @RequiredArgsConstructor
 @ComponentScan(basePackages = "org.occidere.githubnotifier")
-public class GithubNotifierConfiguration extends AbstractElasticsearchConfiguration {
+public class GithubNotifierConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
-    @Override
-    @StepScope
-    public RestHighLevelClient elasticsearchClient() {
-        return RestClients.create(ClientConfiguration.create("localhost:9200")).rest();
-    }
 
     @Bean
     @StepScope
@@ -70,7 +59,7 @@ public class GithubNotifierConfiguration extends AbstractElasticsearchConfigurat
 
     @Bean
     @StepScope
-    public LineMessagingClient lineMessagingClient(@Value("#{jobParameters[lineChannelToken]}") String lineChannel) {
+    public LineMessagingClient lineMessagingClient(@Value("${line.channel.token}") String lineChannel) {
         return LineMessagingClient.builder(lineChannel).build();
     }
 

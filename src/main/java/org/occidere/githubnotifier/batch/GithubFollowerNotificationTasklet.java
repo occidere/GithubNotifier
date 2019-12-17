@@ -43,7 +43,7 @@ public class GithubFollowerNotificationTasklet implements Tasklet {
     @Autowired
     private LineMessagingClient lineMessagingClient;
 
-    @Value("#{jobParameters[botId]}")
+    @Value("${line.bot.id}")
     private String botId;
 
     @Value("#{jobParameters[userId]}")

@@ -27,7 +27,7 @@ public class GithubApiService implements GithubApiRepository {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("#{jobParameters['githubApiToken'] == null ? '' : jobParameters['githubApiToken']}")
+    @Value("${github.api.token}")
     private String githubApiToken;
 
     @Override
