@@ -20,7 +20,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @Getter
 @Setter
 @Document(
-        indexName = "github-followers",
+        indexName = "github-users",
         shards = 5,
         replicas = 1,
         refreshInterval = "60s",
@@ -48,4 +48,5 @@ public class GithubUser {
     @JsonProperty("html_url")
     private String htmlUrl;
     private List<GithubFollower> followerList = new ArrayList<>();
+    private List<GithubRepository> repositories = new ArrayList<>();
 }

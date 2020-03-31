@@ -28,8 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
- * @author sungjun.lee (occidere)
+ * @author occidere
  * @since 2019-12-04
+ * Blog: https://blog.naver.com/occidere
+ * Github: https://github.com/occidere
  */
 @Slf4j
 public class GithubFollowerNotificationTasklet implements Tasklet {
@@ -50,7 +52,7 @@ public class GithubFollowerNotificationTasklet implements Tasklet {
     private String userId;
 
     @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
         log.info("User id: {}", userId);
 
         // Data from Github API
@@ -116,6 +118,8 @@ public class GithubFollowerNotificationTasklet implements Tasklet {
 
         // Update followers to latest status (new followers + exists follower)
         latestUser.setFollowerList(ListUtils.union(newFollowers, notChangedFollowers));
+        // Set repositories using previous one because of the information of repositories cannot fetch from Github API!
+        latestUser.setRepositories(previousUser.getRepositories());
         userRepository.save(latestUser); // always update for user info changed situation
 
         return RepeatStatus.FINISHED;

@@ -1,10 +1,14 @@
 package org.occidere.githubnotifier.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.occidere.githubnotifier.vo.GithubFollower;
+import org.occidere.githubnotifier.vo.GithubRepository;
 import org.occidere.githubnotifier.vo.GithubUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +28,8 @@ import org.springframework.web.client.RestTemplate;
  */
 public class GithubApiService implements GithubApiRepository {
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -31,53 +37,92 @@ public class GithubApiService implements GithubApiRepository {
     private String githubApiToken;
 
     @Override
-    public GithubUser getUser(String userId) {
-        HttpEntity<GithubUser> httpEntity = null;
-        if (StringUtils.isNotBlank(githubApiToken)) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(githubApiToken);
-            httpEntity = new HttpEntity<>(null, headers);
-        }
-
-        ResponseEntity<GithubUser> entity = restTemplate.exchange(
-                URI.create(GITHUB_API_URL + "/users/" + userId),
-                HttpMethod.GET,
-                httpEntity,
-                new ParameterizedTypeReference<GithubUser>() {
-                }
-        );
-        return entity.getBody();
+    public GithubUser getUser(String login) {
+        return MAPPER.convertValue(getRawData("/users/" + login), GithubUser.class);
     }
 
     @Override
-    public List<GithubFollower> getFollowers(String userId) {
-        final String url = GITHUB_API_URL + "/users/" + userId + "/followers?page=";
+    public List<GithubFollower> getFollowers(String login) {
+        return getAllRawData("/users/" + login + "/followers").stream()
+                .map(data -> MAPPER.convertValue(data, GithubFollower.class))
+                .collect(Collectors.toList());
+    }
 
-        HttpEntity<GithubUser> httpEntity = null;
+    @Override
+    public List<GithubRepository> getRepositories(String login) {
+        return getAllRawData("/users/" + login + "/repos").stream()
+                .map(data -> MAPPER.convertValue(data, GithubRepository.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getStargazersLogins(String login, String repoName) {
+        return getAllRawData("/repos/" + login + "/" + repoName + "/stargazers").stream()
+                .map(data -> "" + data.get("login"))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getWatchersLogins(String login, String repoName) {
+        return getAllRawData("/repos/" + login + "/" + repoName + "/watchers").stream()
+                .map(data -> "" + data.get("login"))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getForksLogins(String login, String repoName) {
+        return getAllRawData("/repos/" + login + "/" + repoName + "/forks").stream()
+                .map(data -> "" + data.get("login"))
+                .collect(Collectors.toList());
+    }
+
+    // TODO: refactoring
+    private LinkedHashMap<String, Object> getRawData(String url) {
+        HttpEntity<LinkedHashMap<String, Object>> httpEntity = null;
         if (StringUtils.isNotBlank(githubApiToken)) {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(githubApiToken);
             httpEntity = new HttpEntity<>(null, headers);
         }
 
-        List<GithubFollower> followers = new ArrayList<>();
+        final ResponseEntity<LinkedHashMap<String, Object>> entity = restTemplate.exchange(
+                URI.create(GITHUB_API_URL + url),
+                HttpMethod.GET,
+                httpEntity,
+                new ParameterizedTypeReference<LinkedHashMap<String, Object>>() {
+                }
+        );
+
+        return entity.getBody();
+    }
+
+    // TODO: refactoring
+    private List<LinkedHashMap<String, Object>> getAllRawData(String url) {
+        HttpEntity<LinkedHashMap<String, Object>> httpEntity = null;
+        if (StringUtils.isNotBlank(githubApiToken)) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(githubApiToken);
+            httpEntity = new HttpEntity<>(null, headers);
+        }
+
+        List<LinkedHashMap<String, Object>> data = new ArrayList<>();
         for (int page = 1; ; page++) {
-            final ResponseEntity<List<GithubFollower>> entity = restTemplate.exchange(
-                    URI.create(url + page),
+            final ResponseEntity<List<LinkedHashMap<String, Object>>> entity = restTemplate.exchange(
+                    URI.create(GITHUB_API_URL + url + "?page=" + page),
                     HttpMethod.GET,
                     httpEntity,
-                    new ParameterizedTypeReference<List<GithubFollower>>() {
+                    new ParameterizedTypeReference<List<LinkedHashMap<String, Object>>>() {
                     }
             );
 
-            final List<GithubFollower> body = entity.getBody();
+            final List<LinkedHashMap<String, Object>> body = entity.getBody();
             if (CollectionUtils.isEmpty(body)) {
                 break;
             } else {
-                followers.addAll(body);
+                data.addAll(body);
             }
         }
 
-        return followers;
+        return data;
     }
 }

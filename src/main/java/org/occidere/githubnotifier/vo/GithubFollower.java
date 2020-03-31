@@ -8,8 +8,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * @author sungjun.lee (occidere)
- * @since 2019-12-04
+ * @author occidere
+ * @since 2019. 12. 04.
+ * Blog: https://blog.naver.com/occidere
+ * Github: https://github.com/occidere
  */
 @Getter
 @Setter

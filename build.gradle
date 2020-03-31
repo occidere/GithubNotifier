@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version '2.2.1.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'org.springframework.boot' version '2.2.6.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
 }
 
@@ -23,21 +23,24 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
     implementation 'org.springframework:spring-web'
     implementation 'commons-io:commons-io:2.6'
-    implementation 'org.apache.commons:commons-lang3:3.9'
+    implementation 'org.apache.commons:commons-lang3:3.10'
     implementation 'org.apache.commons:commons-collections4:4.4'
-    implementation 'com.linecorp.bot:line-bot-api-client:3.1.0'
-    implementation 'com.linecorp.bot:line-bot-model:3.1.0'
-
-
+    implementation 'com.linecorp.bot:line-bot-api-client:3.4.0'
+    implementation 'com.linecorp.bot:line-bot-model:3.4.0'
 
     compileOnly 'org.projectlombok:lombok'
 
     annotationProcessor 'org.projectlombok:lombok'
 
+    testCompile 'ch.qos.logback:logback-classic:1.2.3'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation 'org.springframework.batch:spring-batch-test'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 bootJar {

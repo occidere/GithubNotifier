@@ -4,6 +4,7 @@ import com.linecorp.bot.client.LineMessagingClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.occidere.githubnotifier.batch.GithubFollowerNotificationTasklet;
+import org.occidere.githubnotifier.batch.GithubRepositoryNotificationTasklet;
 import org.occidere.githubnotifier.service.GithubApiRepository;
 import org.occidere.githubnotifier.service.GithubApiService;
 import org.springframework.batch.core.Job;
@@ -36,7 +37,6 @@ public class GithubNotifierConfiguration {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
-
     @Bean
     @StepScope
     public RestTemplate restTemplate() {
@@ -64,18 +64,27 @@ public class GithubNotifierConfiguration {
     }
 
     @Bean
-    public Job githubUserFollowerNotificationJob() {
-        return jobBuilderFactory.get("githubUserFollowerNotificationJob")
+    public Job githubUserNotificationJob() {
+        return jobBuilderFactory.get("githubUserNotificationJob")
                 .incrementer(new RunIdIncrementer())
-                .start(githubUserFollowerNotificationStep())
+                .start(githubFollowerNotificationStep())
+                .next(githubRepositoryNotificationStep())
                 .build();
     }
 
     @Bean
     @JobScope
-    public Step githubUserFollowerNotificationStep() {
-        return stepBuilderFactory.get("githubUserFollowerNotificationStep")
+    public Step githubFollowerNotificationStep() {
+        return stepBuilderFactory.get("githubFollowerNotificationStep")
                 .tasklet(githubFollowerNotificationTasklet())
+                .build();
+    }
+
+    @Bean
+    @JobScope
+    public Step githubRepositoryNotificationStep() {
+        return stepBuilderFactory.get("githubRepositoryNotificationStep")
+                .tasklet(githubRepositoryNotificationTasklet())
                 .build();
     }
 
@@ -83,5 +92,11 @@ public class GithubNotifierConfiguration {
     @StepScope
     public GithubFollowerNotificationTasklet githubFollowerNotificationTasklet() {
         return new GithubFollowerNotificationTasklet();
+    }
+
+    @Bean
+    @StepScope
+    public GithubRepositoryNotificationTasklet githubRepositoryNotificationTasklet() {
+        return new GithubRepositoryNotificationTasklet();
     }
 }
