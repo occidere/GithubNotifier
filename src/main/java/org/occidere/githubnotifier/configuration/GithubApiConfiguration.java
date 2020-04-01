@@ -18,8 +18,8 @@ public class GithubApiConfiguration {
     @Bean
     public RestTemplate restTemplate() {
         HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
-        httpRequestFactory.setConnectTimeout(2000);
-        httpRequestFactory.setReadTimeout(3000);
+        httpRequestFactory.setConnectTimeout(6000);
+        httpRequestFactory.setReadTimeout(6000);
         httpRequestFactory.setHttpClient(
                 HttpClientBuilder.create()
                         .setMaxConnTotal(100)
