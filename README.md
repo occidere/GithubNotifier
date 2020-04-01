@@ -48,5 +48,5 @@ Using Github API to fetch User's github informations, and Elasticsearch as main 
 
 ### Command Line
 ```bash
-./gradlew build -x test
+gradle build -x test
 ```
