@@ -1,12 +1,8 @@
 package org.occidere.githubnotifier.configuration;
 
-import com.linecorp.bot.client.LineMessagingClient;
 import lombok.RequiredArgsConstructor;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.occidere.githubnotifier.batch.GithubFollowerNotificationTasklet;
 import org.occidere.githubnotifier.batch.GithubRepositoryNotificationTasklet;
-import org.occidere.githubnotifier.service.GithubApiRepository;
-import org.occidere.githubnotifier.service.GithubApiService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -15,12 +11,9 @@ import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * @author occidere
@@ -36,32 +29,6 @@ public class GithubNotifierConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-
-    @Bean
-    @StepScope
-    public RestTemplate restTemplate() {
-        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
-        httpRequestFactory.setConnectTimeout(2000);
-        httpRequestFactory.setReadTimeout(3000);
-        httpRequestFactory.setHttpClient(
-                HttpClientBuilder.create()
-                        .setMaxConnTotal(100)
-                        .setMaxConnPerRoute(10)
-                        .build());
-        return new RestTemplate(httpRequestFactory);
-    }
-
-    @Bean
-    @StepScope
-    public GithubApiRepository githubApiRepository() {
-        return new GithubApiService();
-    }
-
-    @Bean
-    @StepScope
-    public LineMessagingClient lineMessagingClient(@Value("${line.channel.token}") String lineChannel) {
-        return LineMessagingClient.builder(lineChannel).build();
-    }
 
     @Bean
     public Job githubUserNotificationJob() {

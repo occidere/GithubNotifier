@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.occidere.githubnotifier.vo.GithubFollower;
@@ -33,7 +34,7 @@ public class GithubApiService implements GithubApiRepository {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${github.api.token}")
+    @Value("${github.api.token:}")
     private String githubApiToken;
 
     @Override
@@ -72,7 +73,7 @@ public class GithubApiService implements GithubApiRepository {
     @Override
     public List<String> getForksLogins(String login, String repoName) {
         return getAllRawData("/repos/" + login + "/" + repoName + "/forks").stream()
-                .map(data -> "" + data.get("login"))
+                .map(data -> "" + MAPPER.convertValue(data.get("owner"), Map.class).get("login"))
                 .collect(Collectors.toList());
     }
 
