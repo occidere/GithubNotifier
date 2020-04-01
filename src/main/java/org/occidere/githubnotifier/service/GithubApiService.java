@@ -79,18 +79,13 @@ public class GithubApiService implements GithubApiRepository {
 
     // TODO: refactoring
     private LinkedHashMap<String, Object> getRawData(String url) {
-        HttpEntity<LinkedHashMap<String, Object>> httpEntity = null;
-        if (StringUtils.isNotBlank(githubApiToken)) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(githubApiToken);
-            httpEntity = new HttpEntity<>(null, headers);
-        }
+        HttpEntity<LinkedHashMap<String, Object>> httpEntity = createHttpEntity();
 
         final ResponseEntity<LinkedHashMap<String, Object>> entity = restTemplate.exchange(
                 URI.create(GITHUB_API_URL + url),
                 HttpMethod.GET,
                 httpEntity,
-                new ParameterizedTypeReference<LinkedHashMap<String, Object>>() {
+                new ParameterizedTypeReference<>() {
                 }
         );
 
@@ -99,20 +94,15 @@ public class GithubApiService implements GithubApiRepository {
 
     // TODO: refactoring
     private List<LinkedHashMap<String, Object>> getAllRawData(String url) {
-        HttpEntity<LinkedHashMap<String, Object>> httpEntity = null;
-        if (StringUtils.isNotBlank(githubApiToken)) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(githubApiToken);
-            httpEntity = new HttpEntity<>(null, headers);
-        }
-
+        HttpEntity<List<LinkedHashMap<String, Object>>> httpEntity = createHttpEntity();
         List<LinkedHashMap<String, Object>> data = new ArrayList<>();
+
         for (int page = 1; ; page++) {
             final ResponseEntity<List<LinkedHashMap<String, Object>>> entity = restTemplate.exchange(
                     URI.create(GITHUB_API_URL + url + "?page=" + page),
                     HttpMethod.GET,
                     httpEntity,
-                    new ParameterizedTypeReference<List<LinkedHashMap<String, Object>>>() {
+                    new ParameterizedTypeReference<>() {
                     }
             );
 
@@ -125,5 +115,11 @@ public class GithubApiService implements GithubApiRepository {
         }
 
         return data;
+    }
+
+    private <T> HttpEntity<T> createHttpEntity() {
+        return StringUtils.isBlank(githubApiToken) ? null : new HttpEntity<>(null, new HttpHeaders() {{
+            setBearerAuth(githubApiToken);
+        }});
     }
 }
