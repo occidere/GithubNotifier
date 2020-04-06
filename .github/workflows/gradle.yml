@@ -24,3 +24,14 @@ jobs:
         java-version: 11
     - name: Build with Gradle (skip test)
       run: gradle build -x test
+      
+  coverage:
+    name: 'Coverage'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Upload to Codecov.io
+      shell: bash
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        bash <(curl -s https://codecov.io/bash)
