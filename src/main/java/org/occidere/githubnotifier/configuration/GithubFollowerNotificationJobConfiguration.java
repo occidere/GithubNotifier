@@ -2,7 +2,6 @@ package org.occidere.githubnotifier.configuration;
 
 import lombok.RequiredArgsConstructor;
 import org.occidere.githubnotifier.batch.GithubFollowerNotificationTasklet;
-import org.occidere.githubnotifier.batch.GithubRepositoryNotificationTasklet;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -25,17 +24,16 @@ import org.springframework.context.annotation.Configuration;
 @EnableBatchProcessing
 @RequiredArgsConstructor
 @ComponentScan(basePackages = "org.occidere.githubnotifier")
-public class GithubNotifierConfiguration {
+public class GithubFollowerNotificationJobConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
     public Job githubUserNotificationJob() {
-        return jobBuilderFactory.get("githubUserNotificationJob")
+        return jobBuilderFactory.get("githubFollowerNotificationJob")
                 .incrementer(new RunIdIncrementer())
                 .start(githubFollowerNotificationStep())
-                .next(githubRepositoryNotificationStep())
                 .build();
     }
 
@@ -48,22 +46,8 @@ public class GithubNotifierConfiguration {
     }
 
     @Bean
-    @JobScope
-    public Step githubRepositoryNotificationStep() {
-        return stepBuilderFactory.get("githubRepositoryNotificationStep")
-                .tasklet(githubRepositoryNotificationTasklet())
-                .build();
-    }
-
-    @Bean
     @StepScope
     public GithubFollowerNotificationTasklet githubFollowerNotificationTasklet() {
         return new GithubFollowerNotificationTasklet();
-    }
-
-    @Bean
-    @StepScope
-    public GithubRepositoryNotificationTasklet githubRepositoryNotificationTasklet() {
-        return new GithubRepositoryNotificationTasklet();
     }
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.occidere.githubnotifier.configuration.GithubNotifierConfiguration;
+import org.occidere.githubnotifier.configuration.GithubFollowerNotificationJobConfiguration;
 import org.occidere.githubnotifier.vo.GithubUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
-        GithubNotifierConfiguration.class
+        GithubFollowerNotificationJobConfiguration.class
 })
 public class GithubUserServiceTest {
 
