@@ -1,0 +1,18 @@
+sudo: true
+language: java
+jdk:
+  - openjdk11
+  
+before_install:
+  gradle -b wrapper.gradle wrapper
+
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.gradle'
+
+script: "gradle clean build -x test"
