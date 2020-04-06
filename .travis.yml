@@ -2,6 +2,9 @@ sudo: true
 language: java
 jdk:
   - openjdk11
+  
+before_install:
+  gradle wrapper
 
 branches:
   only:
