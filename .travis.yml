@@ -3,9 +3,6 @@ language: java
 jdk:
   - openjdk11
   
-before_install:
-  gradle -b wrapper.gradle wrapper
-
 branches:
   only:
     - master
@@ -15,4 +12,4 @@ cache:
     - '$HOME/.m2/repository'
     - '$HOME/.gradle'
 
-script: "gradle clean build -x test"
+script: "./gradlew clean build -x test"
