@@ -5,12 +5,14 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.occidere.githubnotifier.configuration.GithubNotifierConfiguration;
+import org.occidere.githubnotifier.configuration.GithubFollowerNotificationJobConfiguration;
+import org.occidere.githubnotifier.configuration.GithubRepositoryNotificationJobConfiguration;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -22,8 +24,12 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
-        GithubNotifierConfiguration.class,
+        GithubFollowerNotificationJobConfiguration.class,
+        GithubRepositoryNotificationJobConfiguration.class,
         GithubNotificationJobTestConfiguration.class
+})
+@SpringBootTest(properties = {
+        "elasticsearch.endpoint=localhost:9200"
 })
 public class GithubNotificationJobTest {
 
