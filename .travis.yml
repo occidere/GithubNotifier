@@ -4,7 +4,7 @@ jdk:
   - openjdk11
   
 install:
-  gradle
+  gradle assemble
 
 branches:
   only:
