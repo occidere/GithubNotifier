@@ -18,7 +18,7 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 @EnableElasticsearchRepositories
 public class ElasticsearchConfiguration extends AbstractElasticsearchConfiguration {
 
-    @Value("${elasticsearch.endpoint}")
+    @Value("${elasticsearch.endpoint:localhost:9200}")
     private String elasticsearchEndpoint;
 
     @Override
