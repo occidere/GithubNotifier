@@ -3,8 +3,8 @@ language: java
 jdk:
   - openjdk11
   
-before_install:
-  gradle wrapper
+install:
+  gradle
 
 branches:
   only:
