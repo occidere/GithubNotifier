@@ -4,8 +4,7 @@
 <img src="https://img.shields.io/github/languages/count/occidere/GithubNotifier"/>
 <img src="https://img.shields.io/github/languages/top/occidere/GithubNotifier"/>
 <img src="https://img.shields.io/github/issues/occidere/GithubNotifier"/>
-<img src="https://img.shields.io/github/last-commit/occidere/GithubNotifier"/>
-<img src="https://img.shields.io/github/commit-activity/w/occidere/GithubNotifier"/>
+![Gradle Build](https://github.com/occidere/GithubNotifier/workflows/Gradle%20Build/badge.svg)
 [![Java Version](https://img.shields.io/badge/Java-11-red.svg)](https://www.java.com/ko/)
 [![GitHub license](https://img.shields.io/github/license/occidere/GithubNotifier.svg)](https://github.com/occidere/GithubNotifier/blob/master/LICENSE)
 
