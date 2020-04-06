@@ -30,7 +30,7 @@ public class GithubFollowerNotificationJobConfiguration {
     private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job githubUserNotificationJob() {
+    public Job githubFollowerNotificationJob() {
         return jobBuilderFactory.get("githubFollowerNotificationJob")
                 .incrementer(new RunIdIncrementer())
                 .start(githubFollowerNotificationStep())
