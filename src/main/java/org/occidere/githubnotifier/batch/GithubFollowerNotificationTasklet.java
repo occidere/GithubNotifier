@@ -16,7 +16,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.occidere.githubnotifier.service.GithubApiRepository;
+import org.occidere.githubnotifier.service.GithubApiService;
 import org.occidere.githubnotifier.service.GithubUserRepository;
 import org.occidere.githubnotifier.vo.GithubFollower;
 import org.occidere.githubnotifier.vo.GithubUser;
@@ -37,7 +37,7 @@ import org.springframework.beans.factory.annotation.Value;
 public class GithubFollowerNotificationTasklet implements Tasklet {
 
     @Autowired
-    private GithubApiRepository apiRepository;
+    private GithubApiService apiService;
 
     @Autowired
     private GithubUserRepository userRepository;
@@ -56,8 +56,8 @@ public class GithubFollowerNotificationTasklet implements Tasklet {
         log.info("User id: {}", userId);
 
         // Data from Github API
-        GithubUser latestUser = apiRepository.getUser(userId);
-        Map<String, GithubFollower> latestFollowers = apiRepository.getFollowers(userId).stream()
+        GithubUser latestUser = apiService.getUser(userId);
+        Map<String, GithubFollower> latestFollowers = apiService.getFollowers(userId).stream()
                 .collect(Collectors.toMap(GithubFollower::getLogin, Function.identity()));
 
         log.info("The number of follower from API: {}", latestFollowers.size());
