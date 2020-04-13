@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author occidere
  * @since 2019. 12. 02.
- * Blog: https://blog.naver.com/occidere
- * Github: https://github.com/occidere
+ * @Blog: https://blog.naver.com/occidere
+ * @Github: https://github.com/occidere
  */
 @Configuration
 @EnableBatchProcessing

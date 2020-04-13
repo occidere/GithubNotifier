@@ -26,7 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class GithubApiServiceTest {
 
     @Autowired
-    private GithubApiRepository repository;
+    private GithubApiService service;
 
     @Test
     public void getUserTest() {
@@ -34,7 +34,7 @@ public class GithubApiServiceTest {
         String login = "occidere";
 
         // OPERATE
-        GithubUser res = repository.getUser(login);
+        GithubUser res = service.getUser(login);
 
         // CHECK
         Assert.assertEquals(login, res.getLogin());
@@ -46,7 +46,7 @@ public class GithubApiServiceTest {
         String login = "marching0531";
 
         // OPERATE
-        Set<String> followersLoginSet = repository.getFollowers(login).stream()
+        Set<String> followersLoginSet = service.getFollowers(login).stream()
                 .map(GithubFollower::getLogin)
                 .collect(Collectors.toSet());
 
@@ -60,7 +60,7 @@ public class GithubApiServiceTest {
         String login = "occidere";
 
         // OPERATE
-        Set<String> repositoriesNameSet = repository.getRepositories(login).stream()
+        Set<String> repositoriesNameSet = service.getRepositories(login).stream()
                 .map(GithubRepository::getName)
                 .collect(Collectors.toSet());
 
@@ -75,7 +75,7 @@ public class GithubApiServiceTest {
         String repoName = "GithubNotifier";
 
         // OPERATE
-        Set<String> stargazersLoginSet = new HashSet<>(repository.getStargazersLogins(login, repoName));
+        Set<String> stargazersLoginSet = new HashSet<>(service.getStargazersLogins(login, repoName));
 
         // CHECK
         Assert.assertTrue(stargazersLoginSet.contains(login));
@@ -88,7 +88,7 @@ public class GithubApiServiceTest {
         String repoName = "GithubNotifier";
 
         // OPERATE
-        Set<String> watchersLoginSet = new HashSet<>(repository.getWatchersLogins(login, repoName));
+        Set<String> watchersLoginSet = new HashSet<>(service.getWatchersLogins(login, repoName));
 
         // CHECK
         Assert.assertTrue(watchersLoginSet.contains(login));
@@ -101,7 +101,7 @@ public class GithubApiServiceTest {
         String repoName = "common";
 
         // OPERATE
-        Set<String> forksLoginSet = new HashSet<>(repository.getForksLogins("NAVER-CAMPUS-HACKDAY-2017w", repoName));
+        Set<String> forksLoginSet = new HashSet<>(service.getForksLogins("NAVER-CAMPUS-HACKDAY-2017w", repoName));
 
         // CHECK
         Assert.assertTrue(forksLoginSet.contains(login));
