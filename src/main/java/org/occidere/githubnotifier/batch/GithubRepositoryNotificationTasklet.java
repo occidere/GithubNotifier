@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.occidere.githubnotifier.service.GithubApiRepository;
+import org.occidere.githubnotifier.service.GithubApiService;
 import org.occidere.githubnotifier.service.GithubRepoRepository;
 import org.occidere.githubnotifier.vo.GithubRepository;
 import org.occidere.githubnotifier.vo.GithubRepositoryDiff;
@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 public class GithubRepositoryNotificationTasklet implements Tasklet {
 
     @Autowired
-    private GithubApiRepository apiRepository;
+    private GithubApiService apiService;
 
     @Autowired
     private GithubRepoRepository repoRepository;
@@ -51,7 +51,7 @@ public class GithubRepositoryNotificationTasklet implements Tasklet {
         log.info("User ID: {}", userId);
 
         // Latest repos info from API
-        List<GithubRepository> latestRepos = apiRepository.getRepositories(userId).stream()
+        List<GithubRepository> latestRepos = apiService.getRepositories(userId).stream()
                 .map(this::fillLoginsIntoRepos)
                 .collect(Collectors.toList());
         log.info("The number of repositories from API: {}", latestRepos.size());
@@ -84,9 +84,9 @@ public class GithubRepositoryNotificationTasklet implements Tasklet {
     }
 
     private GithubRepository fillLoginsIntoRepos(GithubRepository repo) {
-        repo.setForksLogin(apiRepository.getForksLogins(repo.getOwnerLogin(), repo.getName()));
-        repo.setWatchersLogin(apiRepository.getWatchersLogins(repo.getOwnerLogin(), repo.getName()));
-        repo.setStargazersLogin(apiRepository.getStargazersLogins(repo.getOwnerLogin(), repo.getName()));
+        repo.setForksLogin(apiService.getForksLogins(repo.getOwnerLogin(), repo.getName()));
+        repo.setWatchersLogin(apiService.getWatchersLogins(repo.getOwnerLogin(), repo.getName()));
+        repo.setStargazersLogin(apiService.getStargazersLogins(repo.getOwnerLogin(), repo.getName()));
         return repo;
     }
 
