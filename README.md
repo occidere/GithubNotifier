@@ -46,6 +46,13 @@ Using Github API to fetch User's github informations, and Elasticsearch as main 
 ## Build
 
 ### Command Line
+
+#### On-premise Gradle
 ```bash
-gradle build -x test
+gradle build
+```
+
+#### Gradle Wrapper
+```bash
+./gradlew build
 ```
