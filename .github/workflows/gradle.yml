@@ -28,11 +28,11 @@ jobs:
         java-package: jdk
         architecture: x64
 
-    - name: Build with Gradle (skip test)
+    - name: Build with Gradle
       shell: bash
       run: |
         gradle -v
-        gradle build -x test
+        gradle build
 
     - name: Upload to Codecov.io
       shell: bash
