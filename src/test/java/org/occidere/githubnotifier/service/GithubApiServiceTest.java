@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.occidere.githubnotifier.configuration.GithubApiConfiguration;
 import org.occidere.githubnotifier.vo.GithubFollower;
 import org.occidere.githubnotifier.vo.GithubRepository;
 import org.occidere.githubnotifier.vo.GithubUser;
@@ -22,7 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
-        GithubApiConfiguration.class
+        GithubApiService.class
 })
 public class GithubApiServiceTest {
 
