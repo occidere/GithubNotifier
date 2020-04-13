@@ -10,6 +10,8 @@ on:
       - 'release/**'
       - 'hotfix/**'
       - '!feature/**'
+    paths-ignore:
+      - '**.md'
   pull_request:
     branches:
       - master
