@@ -4,6 +4,7 @@ import java.util.List;
 import org.occidere.githubnotifier.vo.GithubFollower;
 import org.occidere.githubnotifier.vo.GithubRepository;
 import org.occidere.githubnotifier.vo.GithubUser;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author occidere
@@ -11,6 +12,7 @@ import org.occidere.githubnotifier.vo.GithubUser;
  * Blog: https://blog.naver.com/occidere
  * Github: https://github.com/occidere
  */
+@Repository
 public interface GithubApiRepository {
     String GITHUB_API_URL = "https://api.github.com";
 
