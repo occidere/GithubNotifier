@@ -5,13 +5,16 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import java.net.URI;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.occidere.githubnotifier.vo.GithubFollower;
@@ -23,10 +26,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.tcp.TcpClient;
+import reactor.util.retry.Retry;
 
 /**
  * @author occidere
@@ -34,6 +37,7 @@ import reactor.netty.tcp.TcpClient;
  * @Github: https://github.com/occidere
  * @since 2019. 12. 02.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GithubApiService implements GithubApiRepository {
@@ -104,15 +108,13 @@ public class GithubApiService implements GithubApiRepository {
     }
 
     private LinkedHashMap<String, Object> getRawData(String url) {
-        return Mono.from(getFluxBody(GITHUB_API_URL + url)).block();
+        return Objects.requireNonNull(getBody(url).block()).get(0);
     }
 
     private List<LinkedHashMap<String, Object>> getAllRawData(String url) {
         List<LinkedHashMap<String, Object>> data = new ArrayList<>();
         for (int page = 1; ; page++) {
-            List<LinkedHashMap<String, Object>> body = getFluxBody(GITHUB_API_URL + url + "?page=" + page)
-                    .collectList()
-                    .block();
+            List<LinkedHashMap<String, Object>> body = getBody(url + "?page=" + page).block();
             if (CollectionUtils.isEmpty(body)) {
                 break;
             } else {
@@ -122,15 +124,18 @@ public class GithubApiService implements GithubApiRepository {
         return data;
     }
 
-    private Flux<LinkedHashMap<String, Object>> getFluxBody(final String absoluteUrl) {
+    private Mono<List<LinkedHashMap<String, Object>>> getBody(final String uri) {
         return webClient.get()
-                .uri(URI.create(absoluteUrl))
+                .uri(URI.create(GITHUB_API_URL + uri))
                 .headers(httpHeaders -> {
                     if (StringUtils.isNotBlank(githubApiToken)) {
                         httpHeaders.setBearerAuth(githubApiToken);
                     }
                 })
                 .retrieve()
-                .bodyToFlux(new ParameterizedTypeReference<>() {});
+                .bodyToFlux(new ParameterizedTypeReference<LinkedHashMap<String, Object>>() {})
+                .collectList()
+                .retryWhen(Retry.backoff(3, Duration.ofSeconds(5))) // will throw exception if failed
+                .defaultIfEmpty(new ArrayList<>());
     }
 }
