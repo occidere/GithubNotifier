@@ -1,7 +1,6 @@
 # GithubNotifier
 
 [![HitCount](http://hits.dwyl.io/occidere/GithubNotifier.svg)](http://hits.dwyl.io/occidere/GithubNotifier)
-<img src="https://img.shields.io/github/languages/count/occidere/GithubNotifier"/>
 <img src="https://img.shields.io/github/languages/top/occidere/GithubNotifier"/>
 <img src="https://img.shields.io/github/issues/occidere/GithubNotifier"/>
 ![Gradle Build](https://github.com/occidere/GithubNotifier/workflows/Gradle%20Build/badge.svg)
