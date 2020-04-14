@@ -1,18 +1,13 @@
 package org.occidere.githubnotifier.batch;
 
-import com.linecorp.bot.client.LineMessagingClient;
-import com.linecorp.bot.model.PushMessage;
-import com.linecorp.bot.model.message.TextMessage;
-import com.linecorp.bot.model.response.BotApiResponse;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.occidere.githubnotifier.service.GithubApiService;
 import org.occidere.githubnotifier.service.GithubRepoRepository;
+import org.occidere.githubnotifier.service.LineMessengerService;
 import org.occidere.githubnotifier.vo.GithubRepository;
 import org.occidere.githubnotifier.vo.GithubRepositoryDiff;
 import org.springframework.batch.core.StepContribution;
@@ -24,9 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author occidere
+ * @Blog: https://blog.naver.com/occidere
+ * @Github: https://github.com/occidere
  * @since 2020. 03. 31.
- * Blog: https://blog.naver.com/occidere
- * Github: https://github.com/occidere
  */
 @Slf4j
 public class GithubRepositoryNotificationTasklet implements Tasklet {
@@ -38,10 +33,7 @@ public class GithubRepositoryNotificationTasklet implements Tasklet {
     private GithubRepoRepository repoRepository;
 
     @Autowired
-    private LineMessagingClient lineMessagingClient;
-
-    @Value("${line.bot.id}")
-    private String botId;
+    private LineMessengerService lineMessengerService;
 
     @Value("#{jobParameters[userId]}")
     private String userId;
@@ -67,15 +59,7 @@ public class GithubRepositoryNotificationTasklet implements Tasklet {
             log.info("{}, (changed: {})", latestRepo.getName(), diff.isNewChanged() || diff.isDeletedChanged());
 
             // Send message
-            if (diff.isNewChanged() || diff.isDeletedChanged()) {
-                try {
-                    String msg = buildMessage(diff);
-                    BotApiResponse response = lineMessagingClient.pushMessage(new PushMessage(botId, new TextMessage(msg))).get();
-                    log.info("{}", response);
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error("Fail to send push message!", e);
-                }
-            }
+            lineMessengerService.sendRepositoryMessageIfExist(diff);
         }
 
         repoRepository.saveAll(latestRepos);
@@ -88,38 +72,5 @@ public class GithubRepositoryNotificationTasklet implements Tasklet {
         repo.setWatchersLogin(apiService.getWatchersLogins(repo.getOwnerLogin(), repo.getName()));
         repo.setStargazersLogin(apiService.getStargazersLogins(repo.getOwnerLogin(), repo.getName()));
         return repo;
-    }
-
-    private String buildMessage(GithubRepositoryDiff diff) {
-        StringBuilder msg = new StringBuilder("[" + diff.getName() + "]\n");
-        final int indent = 4;
-        if (diff.isNewChanged()) {
-            msg.append("[신규]\n")
-                    .append(CollectionUtils.isEmpty(diff.getNewStargazersLogin()) ? "" :
-                            "- STAR\n" + toListedString(diff.getNewStargazersLogin(), indent) + "\n")
-                    .append(CollectionUtils.isEmpty(diff.getNewForksLogin()) ? "" :
-                            "- FORK\n" + toListedString(diff.getNewForksLogin(), indent) + "\n")
-                    .append(CollectionUtils.isEmpty(diff.getNewWatchersLogin()) ? "" :
-                            "- WATCH\n" + toListedString(diff.getNewWatchersLogin(), indent) + "\n");
-        }
-        if (diff.isDeletedChanged()) {
-            msg.append("[삭제]\n")
-                    .append(CollectionUtils.isEmpty(diff.getDeletedStargazersLogin()) ? "" :
-                            "- STAR\n" + toListedString(diff.getDeletedStargazersLogin(), indent) + "\n")
-                    .append(CollectionUtils.isEmpty(diff.getDeletedForksLogin()) ? "" :
-                            "- FORK\n" + toListedString(diff.getDeletedForksLogin(), indent) + "\n")
-                    .append(CollectionUtils.isEmpty(diff.getDeletedWatchersLogin()) ? "" :
-                            "- WATCH\n" + toListedString(diff.getDeletedWatchersLogin(), indent) + "\n");
-        }
-        return msg.toString();
-    }
-
-    private String toListedString(List<String> list, int indent) {
-        final String prefix = " ".repeat(Math.max(0, indent)) + "- ";
-        StringBuilder sb = new StringBuilder();
-        for (String s : list) {
-            sb.append(prefix).append(s).append("\n");
-        }
-        return sb.toString();
     }
 }

@@ -1,24 +1,17 @@
 package org.occidere.githubnotifier.batch;
 
-import com.linecorp.bot.client.LineMessagingClient;
-import com.linecorp.bot.model.PushMessage;
-import com.linecorp.bot.model.message.TextMessage;
-import com.linecorp.bot.model.response.BotApiResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.occidere.githubnotifier.service.GithubApiService;
 import org.occidere.githubnotifier.service.GithubUserRepository;
+import org.occidere.githubnotifier.service.LineMessengerService;
 import org.occidere.githubnotifier.vo.GithubFollower;
+import org.occidere.githubnotifier.vo.GithubFollowerDiff;
 import org.occidere.githubnotifier.vo.GithubUser;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -29,9 +22,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author occidere
+ * @Blog: https://blog.naver.com/occidere
+ * @Github: https://github.com/occidere
  * @since 2019-12-04
- * Blog: https://blog.naver.com/occidere
- * Github: https://github.com/occidere
  */
 @Slf4j
 public class GithubFollowerNotificationTasklet implements Tasklet {
@@ -43,10 +36,7 @@ public class GithubFollowerNotificationTasklet implements Tasklet {
     private GithubUserRepository userRepository;
 
     @Autowired
-    private LineMessagingClient lineMessagingClient;
-
-    @Value("${line.bot.id}")
-    private String botId;
+    private LineMessengerService lineMessengerService;
 
     @Value("#{jobParameters[userId]}")
     private String userId;
@@ -57,71 +47,40 @@ public class GithubFollowerNotificationTasklet implements Tasklet {
 
         // Data from Github API
         GithubUser latestUser = apiService.getUser(userId);
-        Map<String, GithubFollower> latestFollowers = apiService.getFollowers(userId).stream()
-                .collect(Collectors.toMap(GithubFollower::getLogin, Function.identity()));
-
+        Map<String, GithubFollower> latestFollowers = createFollowerByLoginMap(apiService.getFollowers(userId));
         log.info("The number of follower from API: {}", latestFollowers.size());
 
         // Data from DB (Elasticsearch)
         GithubUser previousUser = ObjectUtils.firstNonNull(userRepository.findByLogin(userId), new GithubUser());
-        Map<String, GithubFollower> previousFollowers = previousUser.getFollowerList().stream()
-                .collect(Collectors.toMap(GithubFollower::getLogin, Function.identity()));
-
+        Map<String, GithubFollower> previousFollowers = createFollowerByLoginMap(previousUser.getFollowerList());
         log.info("The number of follower stored in DB: {}", previousFollowers.size());
 
-        // Grouping followers by NEW / DELETE / NOT_CHANGED
-        final List<GithubFollower> newFollowers = new ArrayList<>();
-        final List<GithubFollower> deletedFollowers = new ArrayList<>();
-        final List<GithubFollower> notChangedFollowers = new ArrayList<>();
-
-        // New followers: followers who in latest follower list are not in previous one.
-        // Not changed followers: followers who in both previous and latest follower list.
-        for (Entry<String, GithubFollower> entry : latestFollowers.entrySet()) {
-            if (previousFollowers.containsKey(entry.getKey())) {
-                notChangedFollowers.add(entry.getValue());
-            } else {
-                newFollowers.add(entry.getValue());
-            }
-        }
-
-        // Deleted followers: followers who in previous follower list are not in latest one.
-        for (Entry<String, GithubFollower> entry : previousFollowers.entrySet()) {
-            if (!latestFollowers.containsKey(entry.getKey())) {
-                deletedFollowers.add(entry.getValue());
-            }
-        }
-
-        log.info("Recently added new followers: {}", newFollowers.size());
-        log.info("Recently deleted followers: {}", deletedFollowers.size());
-        log.info("Not changed followers: {}", notChangedFollowers.size());
+        GithubFollowerDiff followerDiff = new GithubFollowerDiff(previousFollowers, latestFollowers);
+        log.info("Recently added new followers: {}", followerDiff.getNewFollowers().size());
+        log.info("Recently deleted followers: {}", followerDiff.getDeletedFollowers().size());
+        log.info("Not changed followers: {}", followerDiff.getNotChangedFollowers().size());
 
         // Send Line message if exist added / deleted followers
-        String msg = "";
-        if (CollectionUtils.isNotEmpty(newFollowers)) {
-            msg += String.format("[%d 명의 새로 추가된 팔로워]\n%s\n",
-                    newFollowers.size(), newFollowers.stream().map(GithubFollower::getLogin).collect(Collectors.joining("\n")));
-        }
+        lineMessengerService.sendFollowerMessageIfExist(followerDiff);
 
-        if (CollectionUtils.isNotEmpty(deletedFollowers)) {
-            msg += String.format("[%d 명의 삭제된 팔로워]\n%s\n",
-                    deletedFollowers.size(), deletedFollowers.stream().map(GithubFollower::getLogin).collect(Collectors.joining("\n")));
-        }
-
-        if (StringUtils.isNotBlank(msg)) {
-            try {
-                BotApiResponse response = lineMessagingClient.pushMessage(new PushMessage(botId, new TextMessage(msg))).get();
-                log.info("{}", response);
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("Fail to send push message!", e);
-            }
-        }
-
-        // Update followers to latest status (new followers + exists follower)
-        latestUser.setFollowerList(ListUtils.union(newFollowers, notChangedFollowers));
-        // Set repositories using previous one because of the information of repositories cannot fetch from Github API!
-        latestUser.setRepositories(previousUser.getRepositories());
-        userRepository.save(latestUser); // always update for user info changed situation
+        // Update DB to latest data
+        updateLatestData(previousUser, latestUser, followerDiff);
 
         return RepeatStatus.FINISHED;
+    }
+
+    private Map<String, GithubFollower> createFollowerByLoginMap(final List<GithubFollower> followers) {
+        return followers.stream().collect(Collectors.toMap(GithubFollower::getLogin, Function.identity()));
+    }
+
+    private void updateLatestData(GithubUser previousUser, GithubUser latestUser, GithubFollowerDiff githubFollowerDiff) {
+        // Update followers to latest status (new followers + exists follower)
+        latestUser.setFollowerList(ListUtils.union(githubFollowerDiff.getNewFollowers(), githubFollowerDiff.getNotChangedFollowers()));
+
+        // Set repositories using previous one because of the information of repositories cannot fetch from Github API!
+        latestUser.setRepositories(previousUser.getRepositories());
+
+        // Always update for user info changed situation
+        userRepository.save(latestUser);
     }
 }
