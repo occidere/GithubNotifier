@@ -9,9 +9,9 @@ import lombok.ToString;
 
 /**
  * @author occidere
+ * @Blog: https://blog.naver.com/occidere
+ * @Github: https://github.com/occidere
  * @since 2019. 12. 04.
- * Blog: https://blog.naver.com/occidere
- * Github: https://github.com/occidere
  */
 @Getter
 @Setter
@@ -19,6 +19,7 @@ import lombok.ToString;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class GithubFollower {
+
     private String login;
     private long id;
     @JsonProperty("node_id")

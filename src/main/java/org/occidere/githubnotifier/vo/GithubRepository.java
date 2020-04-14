@@ -15,9 +15,9 @@ import org.springframework.data.elasticsearch.annotations.Document;
 
 /**
  * @author occidere
+ * @Blog: https://blog.naver.com/occidere
+ * @Github: https://github.com/occidere
  * @since 2020. 03. 31.
- * Blog: https://blog.naver.com/occidere
- * Github: https://github.com/occidere
  */
 @Getter
 @Setter
@@ -34,6 +34,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @NoArgsConstructor
 public class GithubRepository {
+
     @Id
     private String id;
     private String name;

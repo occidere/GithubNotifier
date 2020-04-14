@@ -7,11 +7,12 @@ import org.springframework.stereotype.Repository;
 
 /**
  * @author occidere
+ * @Blog: https://blog.naver.com/occidere
+ * @Github: https://github.com/occidere
  * @since 2019. 11. 29.
- * Blog: https://blog.naver.com/occidere
- * Github: https://github.com/occidere
  */
 @Repository
 public interface GithubRepoRepository extends ElasticsearchRepository<GithubRepository, String> {
+
     List<GithubRepository> findAllByOwnerLogin(String login);
 }
