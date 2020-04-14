@@ -10,9 +10,9 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 
 /**
  * @author occidere
+ * @Blog: https://blog.naver.com/occidere
+ * @Github: https://github.com/occidere
  * @since 2019. 12. 17.
- * Blog: https://blog.naver.com/occidere
- * Github: https://github.com/occidere
  */
 @Configuration
 @EnableElasticsearchRepositories

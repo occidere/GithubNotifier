@@ -10,26 +10,27 @@ import org.apache.commons.collections4.ListUtils;
 
 /**
  * @author occidere
+ * @Blog: https://blog.naver.com/occidere
+ * @Github: https://github.com/occidere
  * @since 2020. 03. 31.
- * Blog: https://blog.naver.com/occidere
- * Github: https://github.com/occidere
  */
 @Getter
 @ToString
 public class GithubRepositoryDiff {
-    private String name;
-    private boolean isNewChanged;
-    private boolean isDeletedChanged;
+
+    private final String name;
+    private final boolean isNewChanged;
+    private final boolean isDeletedChanged;
 
     // New
-    private List<String> newForksLogin;
-    private List<String> newWatchersLogin;
-    private List<String> newStargazersLogin;
+    private final List<String> newForksLogin;
+    private final List<String> newWatchersLogin;
+    private final List<String> newStargazersLogin;
 
     // Deleted
-    private List<String> deletedForksLogin;
-    private List<String> deletedWatchersLogin;
-    private List<String> deletedStargazersLogin;
+    private final List<String> deletedForksLogin;
+    private final List<String> deletedWatchersLogin;
+    private final List<String> deletedStargazersLogin;
 
     public GithubRepositoryDiff(GithubRepository prevRepo, GithubRepository latestRepo) {
         List<String> latestForksLogin = latestRepo.getForksLogin();
