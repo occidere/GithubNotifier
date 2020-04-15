@@ -52,13 +52,23 @@ public class LineMessengerServiceImpl implements LineMessengerService {
         final List<GithubFollower> deletedFollowers = githubFollowerDiff.getDeletedFollowers();
 
         if (CollectionUtils.isNotEmpty(newFollowers)) {
-            msg += String.format("[%d 명의 새로 추가된 팔로워]\n%s\n",
-                    newFollowers.size(), newFollowers.stream().map(GithubFollower::getLogin).collect(Collectors.joining("\n")));
+            msg += String.format("[%d of new followers]\n%s\n",
+                newFollowers.size(),
+                newFollowers.stream()
+                    .map(GithubFollower::getLogin)
+                    .sorted()
+                    .collect(Collectors.joining("\n"))
+            );
         }
 
         if (CollectionUtils.isNotEmpty(deletedFollowers)) {
-            msg += String.format("[%d 명의 삭제된 팔로워]\n%s\n",
-                    deletedFollowers.size(), deletedFollowers.stream().map(GithubFollower::getLogin).collect(Collectors.joining("\n")));
+            msg += String.format("[%d of deleted followers]\n%s\n",
+                deletedFollowers.size(),
+                deletedFollowers.stream()
+                    .map(GithubFollower::getLogin)
+                    .sorted()
+                    .collect(Collectors.joining("\n"))
+            );
         }
 
         return msg;
@@ -69,23 +79,23 @@ public class LineMessengerServiceImpl implements LineMessengerService {
         StringBuilder msg = new StringBuilder("[" + diff.getName() + "]\n");
 
         if (diff.isNewChanged()) {
-            msg.append("[신규]\n")
+            msg.append("[NEW]\n")
                     .append(CollectionUtils.isEmpty(diff.getNewStargazersLogin()) ? "" :
-                            "- STAR\n" + toListedString(diff.getNewStargazersLogin(), indent) + "\n")
+                            "- STAR\n" + toSortedListString(diff.getNewStargazersLogin(), indent) + "\n")
                     .append(CollectionUtils.isEmpty(diff.getNewForksLogin()) ? "" :
-                            "- FORK\n" + toListedString(diff.getNewForksLogin(), indent) + "\n")
+                            "- FORK\n" + toSortedListString(diff.getNewForksLogin(), indent) + "\n")
                     .append(CollectionUtils.isEmpty(diff.getNewWatchersLogin()) ? "" :
-                            "- WATCH\n" + toListedString(diff.getNewWatchersLogin(), indent) + "\n");
+                            "- WATCH\n" + toSortedListString(diff.getNewWatchersLogin(), indent) + "\n");
         }
 
         if (diff.isDeletedChanged()) {
-            msg.append("[삭제]\n")
+            msg.append("[DELETED]\n")
                     .append(CollectionUtils.isEmpty(diff.getDeletedStargazersLogin()) ? "" :
-                            "- STAR\n" + toListedString(diff.getDeletedStargazersLogin(), indent) + "\n")
+                            "- STAR\n" + toSortedListString(diff.getDeletedStargazersLogin(), indent) + "\n")
                     .append(CollectionUtils.isEmpty(diff.getDeletedForksLogin()) ? "" :
-                            "- FORK\n" + toListedString(diff.getDeletedForksLogin(), indent) + "\n")
+                            "- FORK\n" + toSortedListString(diff.getDeletedForksLogin(), indent) + "\n")
                     .append(CollectionUtils.isEmpty(diff.getDeletedWatchersLogin()) ? "" :
-                            "- WATCH\n" + toListedString(diff.getDeletedWatchersLogin(), indent) + "\n");
+                            "- WATCH\n" + toSortedListString(diff.getDeletedWatchersLogin(), indent) + "\n");
         }
 
         return msg.toString();
@@ -102,12 +112,11 @@ public class LineMessengerServiceImpl implements LineMessengerService {
         }
     }
 
-    private static String toListedString(List<String> list, int indent) {
+    private static String toSortedListString(final List<String> logins, final int indent) {
         final String prefix = " ".repeat(Math.max(0, indent)) + "- ";
-        StringBuilder sb = new StringBuilder();
-        for (String s : list) {
-            sb.append(prefix).append(s).append("\n");
-        }
-        return sb.toString();
+        return logins.stream()
+            .sorted()
+            .map(login -> prefix + login + "\n")
+            .collect(Collectors.joining());
     }
 }
