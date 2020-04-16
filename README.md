@@ -16,15 +16,25 @@ Using Github API to fetch User's github informations, and Elasticsearch as main 
 
 <br>
 
-## Examples
+## Features
 
-### Followers Change
-![image](https://user-images.githubusercontent.com/20942871/78133548-90e41700-7459-11ea-9c20-88bf017e75db.png)
+### 1. Follower change notification
+Notify follower change both increase and decrease.
+
+#### Examples
+
+![image](https://user-images.githubusercontent.com/20942871/79457506-481c8880-802b-11ea-95d7-3a1e8cb29a28.png)
+
+
 
 <br>
 
-### Stargazers / Watchers / Forks Change
+### 2. Repository change notification
+Notify Stargazer / Watcher / Fork change both increase and decrease.
+
+#### Examples
 ![image](https://user-images.githubusercontent.com/20942871/78133607-b07b3f80-7459-11ea-9ec2-6abfdf3702b0.png)
+
 
 <br>
 
