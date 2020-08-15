@@ -23,10 +23,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'commons-io:commons-io:2.7'
-    implementation 'org.apache.commons:commons-lang3:3.10'
+    implementation 'org.apache.commons:commons-lang3:3.11'
     implementation 'org.apache.commons:commons-collections4:4.4'
-    implementation 'com.linecorp.bot:line-bot-api-client:3.6.0'
-    implementation 'com.linecorp.bot:line-bot-model:3.6.0'
+    implementation 'com.linecorp.bot:line-bot-api-client:4.0.0'
+    implementation 'com.linecorp.bot:line-bot-model:4.0.0'
+    implementation 'org.scala-lang:scala-library:2.13.3'
 
     compileOnly 'org.projectlombok:lombok'
 
