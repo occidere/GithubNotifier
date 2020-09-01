@@ -1,4 +1,4 @@
-# GithubNotifier
+# GithubNotifier (Deprecated)
 
 [![HitCount](http://hits.dwyl.io/occidere/GithubNotifier.svg)](http://hits.dwyl.io/occidere/GithubNotifier)
 <img src="https://img.shields.io/github/languages/top/occidere/GithubNotifier"/>
@@ -7,6 +7,16 @@
 [![Java Version](https://img.shields.io/badge/Java-11-red.svg)](https://www.java.com/ko/)
 [![GitHub license](https://img.shields.io/github/license/occidere/GithubNotifier.svg)](https://github.com/occidere/GithubNotifier/blob/master/LICENSE)
 
+<br>
+
+## **⚠ This project has been moved to [GithubWatcher](https://github.com/occidere/GithubWatcher)**
+**This repository will not be updated more.**
+**Project should countinue in [GithubWatcher](https://github.com/occidere/GithubWatcher)**
+
+<br>
+<br>
+<br>
+<br>
 
 Multi-purpose github event notification batch.
 
